@@ -1,0 +1,3 @@
+include:
+  - file: vlcrc
+destination: 'home/vlc'

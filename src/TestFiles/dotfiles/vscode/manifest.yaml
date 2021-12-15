@@ -1,0 +1,18 @@
+include:
+  - file: settings.json # is the same as 'file: settings.json'
+  - file: gitignore
+    destination: .gitignore
+  - file: profiles.json
+    destination: folder/
+exclude:
+  - .gitignore # is the same as 'file: .gitignore'
+
+windows:
+  destination: '%appdata%/Code/User'
+linux:
+  destination: $XDG_CONFIG_HOME/Code/User
+macos:
+  destination: ~/Library/Application Support/Code/User/settings.json
+
+load_script: mv settings.json ~/.config
+save_script: mv ~/.config .

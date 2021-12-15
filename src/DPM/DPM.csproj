@@ -1,9 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFrameworks>net6.0</TargetFrameworks>
-		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
 		<Version>0.1.0</Version>
 		<Authors>Andtech Studios</Authors>
 		<Company>Andtech Studios</Company>
@@ -32,6 +31,7 @@
 
 	<!-- Dotnet Tool settings -->
 	<PropertyGroup>
+		<PackAsTool>true</PackAsTool>
 		<PackageId>Andtech.DPM</PackageId>
 		<ToolCommandName>dpm</ToolCommandName>
 		<PackageOutputPath>./nupkg</PackageOutputPath>

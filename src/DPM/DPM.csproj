@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFrameworks>net6.0</TargetFrameworks>
-		<Version>0.1.0</Version>
+		<Version>0.2.0</Version>
 		<Authors>Andtech Studios</Authors>
 		<Company>Andtech Studios</Company>
 		<StartupObject></StartupObject>
@@ -20,8 +20,8 @@
 		<RepositoryType></RepositoryType>
 		<PackageLicenseExpression></PackageLicenseExpression>
 		<AssemblyName>DPM</AssemblyName>
-		<AssemblyVersion>0.1.0.0</AssemblyVersion>
-		<FileVersion>0.1.0.0</FileVersion>
+		<AssemblyVersion>0.2.0.0</AssemblyVersion>
+		<FileVersion>0.2.0.0</FileVersion>
 		<Product>Dotfiles Package Manager</Product>
 		<RepositoryUrl>https://github.com/andtechstudios/dpm</RepositoryUrl>
 		<RootNamespace>Andtech.DPM</RootNamespace>

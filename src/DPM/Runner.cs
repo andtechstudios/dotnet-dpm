@@ -49,10 +49,10 @@ namespace Andtech.DPM
 			destinationRootPath = destinationPathProcessor.ProcessDestination(destinationRootPath);
 
 			var executor = new Executor(session, options);
-			foreach (var file in manifest.include)
+			foreach (var include in manifest.include)
 			{
-				var sourceFilePath = UniversalPath.Combine(sourceRootPath, file.file);
-				var destinationFilePath = UniversalPath.Combine(destinationRootPath, file.GetDestinationPath());
+				var sourceFilePath = UniversalPath.Combine(sourceRootPath, include.path);
+				var destinationFilePath = UniversalPath.Combine(destinationRootPath, include.GetDestinationPath());
 
 				try
 				{

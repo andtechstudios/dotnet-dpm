@@ -5,9 +5,9 @@ using YamlDotNet.Serialization;
 namespace Andtech.DPM
 {
 
-	public class ManifestFile
+	public class Include
 	{
-		public string file { get; set; }
+		public string path { get; set; }
 		public string destination { get; set; }
 
 		public string GetDestinationPath()
@@ -18,12 +18,12 @@ namespace Andtech.DPM
 				fileName = destination;
 				if (PathUtility.IsDirectory(destination))
 				{
-					fileName = Path.Combine(fileName, file);
+					fileName = Path.Combine(fileName, path);
 				}
 			}
 			else
 			{
-				fileName = file;
+				fileName = path;
 			}
 
 			return fileName;
@@ -37,7 +37,7 @@ namespace Andtech.DPM
 
 	internal class Manifest
 	{
-		public List<ManifestFile> include { get; set; }
+		public List<Include> include { get; set; }
 		public List<string> exclude { get; set; }
 		public string destination;
 		public string load_script;

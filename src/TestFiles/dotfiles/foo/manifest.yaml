@@ -1,5 +1,5 @@
 include:
-  - file: settings.json
+  - path: settings.json
 
 windows:
   destination: '%appdata%/foo'

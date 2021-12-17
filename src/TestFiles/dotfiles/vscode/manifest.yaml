@@ -1,8 +1,8 @@
 include:
-  - file: settings.json # is the same as 'file: settings.json'
-  - file: gitignore
+  - path: settings.json # is the same as 'file: settings.json'
+  - path: gitignore
     destination: .gitignore
-  - file: profiles.json
+  - path: profiles.json
     destination: folder/
 exclude:
   - .gitignore # is the same as 'file: .gitignore'

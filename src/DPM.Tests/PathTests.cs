@@ -18,7 +18,7 @@ namespace Andtech.DPM.Tests
 		[Test]
 		public void DetectVariable()
 		{
-			var pattern = BaseVariableExpander.GetVariablePattern("~");
+			var pattern = VariableExpander.GetVariablePattern("~");
 			var output = Regex.Replace("~/foo/bar", pattern, "$HOME/");
 
 			Assert.AreEqual("$HOME/foo/bar", output);

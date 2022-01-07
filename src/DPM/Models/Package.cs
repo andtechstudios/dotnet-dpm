@@ -5,6 +5,12 @@ using YamlDotNet.Serialization;
 namespace Andtech.DPM
 {
 
+	public interface IInstallLocation
+	{
+
+		string Destination { get; }
+	}
+
 	public class Include
 	{
 		public string path { get; set; }
@@ -30,69 +36,72 @@ namespace Andtech.DPM
 		}
 	}
 
-	public class ManifestTarget
+	public class InstallLocation : IInstallLocation
 	{
 		public string destination { get; set; }
+
+		string IInstallLocation.Destination => destination;
 	}
 
-	internal class Manifest
+	internal class Package : IInstallLocation
 	{
 		public List<Include> include { get; set; }
 		public List<string> exclude { get; set; }
 		public string destination;
 		public string load_script;
 		public string save_script;
-		public ManifestTarget windows;
-		public ManifestTarget macos;
-		public ManifestTarget linux;
+		public InstallLocation windows;
+		public InstallLocation macos;
+		public InstallLocation linux;
+		public InstallLocation wsl;
+		public string Root => System.IO.Path.GetDirectoryName(Path);
 		public string Path { get; set; }
 
-		public ManifestTarget GetTarget(Platform platform)
+		string IInstallLocation.Destination => destination;
+
+		public IInstallLocation GetInstallLocation(Platform platform)
 		{
 			switch (platform)
 			{
 				case Platform.windows:
 				case Platform.wsl:
-					return windows;
+					if (windows != null)
+					{
+						return windows;
+					}
+					break;
 				case Platform.macos:
-					return macos;
+					if (macos != null)
+					{
+						return macos;
+					}
+					break;
 				case Platform.linux:
-					return linux;
+					if (linux != null)
+					{
+						return linux;
+					}
+					break;
 			}
 
-			return null;
+			return this;
 		}
 
-		public string GetDestinationRoot(Platform platform)
+		public static Package Read(string path)
 		{
-			string path = string.Empty;
-			switch (platform)
+			var filename = System.IO.Path.GetFileName(path);
+			if (!(filename == "package.yaml"))
 			{
-				case Platform.windows:
-				case Platform.wsl:
-					path = windows?.destination;
-					break;
-				case Platform.macos:
-					path = macos?.destination;
-					break;
-				case Platform.linux:
-					path = linux?.destination;
-					break;
+				path = System.IO.Path.Combine(path, "package.yaml");
 			}
 
-			return string.IsNullOrEmpty(path) ? destination : path;
-		}
-
-		public static Manifest Read(string path)
-		{
-			path = System.IO.Path.Combine(path, "manifest.yaml");
 			var deserializer = new DeserializerBuilder()
 				.Build();
 
-			var manifest = deserializer.Deserialize<Manifest>(new StreamReader(path));
-			manifest.Path = System.IO.Path.GetFullPath(path);
+			var package = deserializer.Deserialize<Package>(new StreamReader(path));
+			package.Path = System.IO.Path.GetFullPath(path);
 
-			return manifest;
+			return package;
 		}
 	}
 }

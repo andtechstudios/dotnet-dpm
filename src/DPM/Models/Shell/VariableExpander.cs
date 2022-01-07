@@ -84,6 +84,7 @@ namespace Andtech.DPM
 			var variable = match;
 			variable = variable.Trim('%');
 			variable = WSLUtility.WSLVar(variable).Result;
+			variable = WSLUtility.WSLPath(variable, WSLPathOption.TranslateFromAWindowsPathToAWSLPath).Result;
 
 			return variable;
 		}

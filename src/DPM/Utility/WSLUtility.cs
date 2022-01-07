@@ -1,4 +1,5 @@
 ﻿using CliWrap;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -84,6 +85,24 @@ namespace Andtech.DPM
 			catch { }
 
 			return path;
+		}
+
+		public static bool IsWSL()
+		{
+			string value;
+			value = Environment.GetEnvironmentVariable("IS_WSL");
+			if (!string.IsNullOrEmpty(value))
+			{
+				return true;
+			}
+
+			value = Environment.GetEnvironmentVariable("WSL_DISTRO_NAME");
+			if (!string.IsNullOrEmpty(value))
+			{
+				return true;
+			}
+
+			return false;
 		}
 	}
 }

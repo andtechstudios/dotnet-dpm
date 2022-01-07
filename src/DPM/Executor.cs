@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Andtech.Common;
+using System;
 using System.IO;
 
 namespace Andtech.DPM
@@ -6,18 +7,16 @@ namespace Andtech.DPM
 
 	internal class Executor
 	{
-		private readonly Session session;
-		private readonly Options options;
-		private readonly BaseFileTransferrer fileTransferrer;
+		private InstallOperation.Options options;
+		private Shell shell;
 
-		public Executor(Session session, Options options)
+		public Executor(InstallOperation.Options options, Shell shell)
 		{
 			this.options = options;
-			this.session = session;
-			fileTransferrer = options.IsDestinationWindowsPath ? new WindowsFileTransferrer() : new FileTransferrer();
+			this.shell = shell;
 		}
 
-		public void Execute(UniversalPath sourceFilePath, UniversalPath destinationFilePath)
+		public void Execute(string sourceFilePath, string destinationFilePath)
 		{
 			if (options.CreateSymbolicLink)
 			{
@@ -33,86 +32,58 @@ namespace Andtech.DPM
 			}
 		}
 
-		void CreateDirectoryIfNoExists(UniversalPath path)
+		void CreateDirectoryIfNoExists(string path)
 		{
-			string directory;
-			if (session.IsInWindowsShell)
-			{
-				directory = Path.GetDirectoryName(path.AsWindows());
-			}
-			else
-			{
-				directory = Path.GetDirectoryName(path.AsUnix());
-			}
+			string parent = Path.GetDirectoryName(path);
 
-			if (!Directory.Exists(directory))
+			if (!Directory.Exists(parent))
 			{
-				Print($"Creating directory '{directory}'...");
+				Log.WriteLine($"Creating directory '{parent}'...", ConsoleColor.Yellow, Verbosity.silly);
 				if (!options.DryRun)
 				{
-					Directory.CreateDirectory(directory);
+					Directory.CreateDirectory(parent);
 				}
 			}
 		}
 
-		void DeletePathIfExists(UniversalPath destination)
+		void DeletePathIfExists(string destination)
 		{
-			string path;
-			if (session.IsInWindowsShell)
+			if (File.Exists(destination))
 			{
-				path = destination.AsWindows();
-			}
-			else
-			{
-				path = destination.AsUnix();
-			}
-
-			if (File.Exists(path))
-			{
-				Print($"Deleting file '{path}'...");
+				Log.WriteLine($"Deleting file '{destination}'...", ConsoleColor.Yellow, Verbosity.silly);
 				if (!options.DryRun)
 				{
-					File.Delete(path);
+					File.Delete(destination);
 				}
 			}
-			else if (Directory.Exists(path))
+			else if (Directory.Exists(destination))
 			{
-				Print($"Creating directory '{path}'...");
+				Log.WriteLine($"Deleting directory '{destination}'...", ConsoleColor.Yellow, Verbosity.silly);
 				if (!options.DryRun)
 				{
-					Directory.Delete(path);
+					Directory.Delete(destination, true);
 				}
 			}
 		}
 
-		void CreateSymbolicLink(UniversalPath source, UniversalPath destination)
+		void CreateSymbolicLink(string source, string destination)
 		{
-			Print($"Creating symlink for '{source}' at '{destination}'...");
+			source = Path.GetFullPath(source);
+			destination = Path.GetFullPath(destination);
+			Log.WriteLine($"Creating symlink for '{source}' at '{destination}'...", ConsoleColor.Yellow, Verbosity.silly);
 			if (!options.DryRun)
 			{
-				fileTransferrer.CreateSymlink(source, destination);
+				shell.CreateSymbolicLink(source, destination);
 			}
 		}
 
-		void Copy(UniversalPath source, UniversalPath destination)
+		void Copy(string source, string destination)
 		{
-			Print($"Copying '{source}' to '{destination}'...");
+			Log.WriteLine($"Copying '{source}' to '{destination}'...", ConsoleColor.Yellow, Verbosity.silly);
 			if (!options.DryRun)
 			{
-				fileTransferrer.Copy(source, destination);
+				shell.Copy(source, destination);
 			}
-		}
-
-		void Print(object message)
-		{
-			string prefix = string.Empty;
-			if (options.DryRun)
-			{
-				Console.ForegroundColor = ConsoleColor.Yellow;
-				prefix = $"[DRY RUN] ";
-			}
-			Console.WriteLine($"{prefix}{message}");
-			Console.ResetColor();
 		}
 	}
 }

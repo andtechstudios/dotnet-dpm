@@ -1,4 +1,5 @@
 ﻿using Andtech.Common;
+using System.IO;
 
 namespace Andtech.DPM
 {
@@ -14,7 +15,8 @@ namespace Andtech.DPM
 
 		public override void CreateSymbolicLink(string targetPath, string linkPath)
 		{
-			WindowsUtility.Mklink(targetPath, linkPath);
+			var isDirectory = Directory.Exists(targetPath);
+			WindowsUtility.Mklink(targetPath, linkPath, isDirectory);
 		}
 	}
 }

@@ -15,6 +15,7 @@ namespace Andtech.DPM
 
 		public override void CreateSymbolicLink(string targetPath, string linkPath)
 		{
+			var isDirectory = Directory.Exists(targetPath);
 			// Assume link directory already exists
 			var linkDirectory = Path.GetDirectoryName(linkPath);
 			var linkFileName = Path.GetFileName(linkPath);
@@ -22,7 +23,7 @@ namespace Andtech.DPM
 			linkDirectory = WSLUtility.WSLPath(linkDirectory, WSLPathOption.TranslateFromAWSLPathToAWindowsPath).Result;
 			linkPath = Path.Combine(linkDirectory, linkFileName)
 				.Replace("/", "\\");
-			WindowsUtility.Mklink(targetPath, linkPath);
+			WindowsUtility.Mklink(targetPath, linkPath, isDirectory);
 		}
 	}
 }

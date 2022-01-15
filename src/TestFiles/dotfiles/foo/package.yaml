@@ -1,9 +1,5 @@
 include:
   - path: settings.json
+  - path: syntax/*
 
-windows:
-  destination: '%appdata%/foo'
-linux:
-  destination: $XDG_CONFIG_HOME/foo
-macos:
-  destination: ~/Library/Application Support/Code
+destination: "alpha/**/charlie"

@@ -7,7 +7,7 @@
 		<Authors>Andtech Studios</Authors>
 		<Company>Andtech Studios</Company>
 		<StartupObject></StartupObject>
-		<!-- 
+		<!--
 		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
 		-->
 	</PropertyGroup>
@@ -46,6 +46,7 @@
 	  <PackageReference Include="Andtech.Common" Version="0.4.0" />
 	  <PackageReference Include="CliWrap" Version="3.3.3" />
 	  <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
+	  <PackageReference Include="Glob.cs" Version="5.1.766" />
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	  <PackageReference Include="YamlDotNet" Version="11.2.1" />
 	</ItemGroup>

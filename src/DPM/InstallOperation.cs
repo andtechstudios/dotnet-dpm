@@ -24,8 +24,8 @@ namespace Andtech.DPM
 			Log.Verbosity = options.Verbose ? Verbosity.verbose : options.Verbosity;
 
 			// Logging
-			Log.WriteLine($"Dotfiles root is: '{session.DotfilesRoot}'", Verbosity.verbose);
-			Log.WriteLine($"Platform is: '{session.Platform}'", Verbosity.verbose);
+			Log.WriteLine($"Dotfiles root is: '{session.DotfilesRoot}'", Verbosity.diagnostic);
+			Log.WriteLine($"Platform is: '{session.Platform}'", Verbosity.diagnostic);
 
 			// Read dotfile package
 			var package = LoadPackage(options.Name);
@@ -34,7 +34,7 @@ namespace Andtech.DPM
 			var preferredDestinationPlatform = options.Platform;
 			var destinationPlatform = CoalescePlatform(preferredDestinationPlatform);
 			var shell = Shell.GetCurrentShell(destinationPlatform);
-			Log.WriteLine($"Preferred destination platform: '{preferredDestinationPlatform}'", Verbosity.verbose);
+			Log.WriteLine($"Preferred destination platform: '{preferredDestinationPlatform}'", Verbosity.diagnostic);
 
 			// Prepare install location
 			var installLocation = package.GetInstallLocation(destinationPlatform);
@@ -49,30 +49,36 @@ namespace Andtech.DPM
 
 			// Logging
 			Log.WriteLine($"Installing dotfiles as '{destinationPlatform}'...", Verbosity.normal);
-			Log.WriteLine($"Source root path: '{sourceRootPath}'", Verbosity.verbose);
-			Log.WriteLine($"Destination root path: '{destinationRootsGlob}'", Verbosity.verbose);
+			Log.WriteLine($"Source root path: '{sourceRootPath}'", Verbosity.silly);
+			Log.WriteLine($"Destination root glob: '{destinationRootsGlob}'", Verbosity.silly);
+
+			var destinationRoots = Glob.ExpandNames(destinationRootsGlob);
+			Log.WriteLine($"Source paths are:", Verbosity.diagnostic);
+			Log.WriteLine(string.Join(Environment.NewLine, package.GetIncludedFiles()), Verbosity.diagnostic);
+			Log.WriteLine($"Destination roots are:", Verbosity.diagnostic);
+			Log.WriteLine(string.Join(Environment.NewLine, destinationRoots), Verbosity.diagnostic);
 
 			var executor = new Executor(options, shell);
-
-			var sourcePaths = package.GetIncludedFiles();
-			var destinationRoots = Glob.ExpandNames(destinationRootsGlob);
-
 			foreach (var destinationRoot in destinationRoots)
 			{
-				foreach (var sourcePath in sourcePaths)
+				foreach (var include in package.include)
 				{
-					var relativeSourcePath = Path.GetRelativePath(sourceRootPath, sourcePath);
-					try
+					var sourcePaths = include.ExpandGlob(package.Root);
+					foreach (var relativeSourcePath in sourcePaths)
 					{
-						var destinationPath = Path.Combine(destinationRoot, relativeSourcePath);
+						var sourcePath = Path.Combine(package.Root, relativeSourcePath);
+						try
+						{
+							var destinationPath = Path.Combine(destinationRoot, include.GetDestinationPath(relativeSourcePath));
 
-						executor.Execute(sourcePath, destinationPath);
-						Log.WriteLine($"Installed '{relativeSourcePath}' to '{destinationPath}'", ConsoleColor.Green, Verbosity.normal);
-					}
-					catch (Exception ex)
-					{
-						Log.Error.WriteLine($"Failed to install '{relativeSourcePath}'", ConsoleColor.Red, Verbosity.normal);
-						Log.Error.WriteLine(ex, ConsoleColor.Red, Verbosity.verbose);
+							executor.Execute(sourcePath, destinationPath);
+							Log.WriteLine($"Installed '{relativeSourcePath}' to '{destinationPath}'", ConsoleColor.Green, Verbosity.normal);
+						}
+						catch (Exception ex)
+						{
+							Log.Error.WriteLine($"Failed to install '{relativeSourcePath}'", ConsoleColor.Red, Verbosity.normal);
+							Log.Error.WriteLine(ex, ConsoleColor.Red, Verbosity.verbose);
+						}
 					}
 				}
 			}

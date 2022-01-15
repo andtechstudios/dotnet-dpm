@@ -7,9 +7,6 @@
 		<Authors>Andtech Studios</Authors>
 		<Company>Andtech Studios</Company>
 		<StartupObject></StartupObject>
-		<!--
-		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
-		-->
 	</PropertyGroup>
 
 	<!-- NuGet settings -->
@@ -32,18 +29,29 @@
 		<Authors>Andtech Studios</Authors>
 	</PropertyGroup>
 
+	<!-- Linux Debugging -->
+	<Choose>
+		<When Condition=" '$(Configuration)'=='Debug' ">
+			<PropertyGroup>
+				<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+			</PropertyGroup>
+		</When>
+		<Otherwise>
+			<PropertyGroup>
+				<PackAsTool>true</PackAsTool>
+			</PropertyGroup>
+		</Otherwise>
+	</Choose>
+
 	<!-- Dotnet Tool settings -->
 	<PropertyGroup>
-		<!-- -->
-		<PackAsTool>true</PackAsTool>
-		<!-- -->
 		<PackageId>Andtech.DPM</PackageId>
 		<ToolCommandName>dpm</ToolCommandName>
 		<PackageOutputPath>./nupkg</PackageOutputPath>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 	<ItemGroup>
-	  <PackageReference Include="Andtech.Common" Version="0.4.0" />
+	  <PackageReference Include="Andtech.Common" Version="0.6.0" />
 	  <PackageReference Include="CliWrap" Version="3.3.3" />
 	  <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
 	  <PackageReference Include="Glob.cs" Version="5.1.766" />

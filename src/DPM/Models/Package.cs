@@ -18,7 +18,7 @@ namespace Andtech.DPM
 		public string path { get; set; }
 		public string destination { get; set; }
 
-		public string GetDestinationPath()
+		public string GetDestinationPath(string path)
 		{
 			string fileName;
 			if (!string.IsNullOrEmpty(destination))
@@ -35,6 +35,13 @@ namespace Andtech.DPM
 			}
 
 			return fileName;
+		}
+
+		public IEnumerable<string> ExpandGlob(string root)
+		{
+			var glob = Path.Combine(root, path);
+			return Glob.ExpandNames(glob)
+				.Select(x => Path.GetRelativePath(root, x));
 		}
 	}
 
@@ -61,16 +68,7 @@ namespace Andtech.DPM
 
 		string IInstallLocation.Destination => destination;
 
-		public IEnumerable<string> GetIncludedFiles()
-		{
-			return include.SelectMany(ExpandIncludeGlob);
-
-			IEnumerable<string> ExpandIncludeGlob(Include include)
-			{
-				var sourcePathsGlob = System.IO.Path.Combine(Root, include.GetDestinationPath());
-				return Glob.ExpandNames(sourcePathsGlob);
-			}
-		}
+		public IEnumerable<string> GetIncludedFiles() => include.SelectMany(x => x.ExpandGlob(Root));
 
 		public IInstallLocation GetInstallLocation(Platform platform)
 		{

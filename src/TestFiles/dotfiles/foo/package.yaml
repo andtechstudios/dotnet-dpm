@@ -1,5 +1,6 @@
 include:
   - path: settings.json
+    destination: Settings/
   - path: syntax/*
 
 destination: "alpha/*/charlie"

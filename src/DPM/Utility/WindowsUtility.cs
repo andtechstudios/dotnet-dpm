@@ -1,5 +1,6 @@
 ﻿using CliWrap;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Andtech.DPM
 {
@@ -8,10 +9,11 @@ namespace Andtech.DPM
 
 		public static void Mklink(string targetPath, string linkName)
 		{
+			var linkType = Directory.Exists(targetPath) ? "/D" : string.Empty;
 			var arguments = new List<string>
 			{
 				"/C",
-				$"mklink {linkName} {targetPath}"
+				$"mklink {linkType} {linkName} {targetPath}"
 			};
 
 			Cli.Wrap("cmd.exe")

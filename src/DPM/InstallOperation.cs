@@ -1,7 +1,10 @@
 ﻿using Andtech.Common;
 using CommandLine;
+using Ganss.IO;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Andtech.DPM
@@ -50,21 +53,29 @@ namespace Andtech.DPM
 			Log.WriteLine($"Destination root path: '{destinationRootPath}'", Verbosity.verbose);
 
 			var executor = new Executor(options, shell);
-			foreach (var include in package.include)
+
+			var destinationRoots = Glob.ExpandNames(destinationRootPath);
+			foreach (var destinationRoot in destinationRoots)
 			{
-				var sourcePath = Path.Combine(sourceRootPath, include.path);
-				var destinationPath = Path.Combine(destinationRootPath, include.GetDestinationPath());
-
-				try
+				foreach (var include in package.include)
 				{
-					executor.Execute(sourcePath, destinationPath);
+					var sourceRoot = Path.Combine(sourceRootPath, include.path);
+					var sourcePaths = Glob.ExpandNames(sourceRoot);
+					try
+					{
+						foreach (var sourcePath in sourcePaths)
+						{
+							var destinationPath = Path.Combine(destinationRoot, include.GetDestinationPath());
 
-					Log.WriteLine($"Installed '{include.path}' to '{destinationPath}'", ConsoleColor.Green, Verbosity.normal);
-				}
-				catch (Exception ex)
-				{
-					Log.Error.WriteLine($"Failed to install '{include.path}'", ConsoleColor.Red, Verbosity.normal);
-					Log.Error.WriteLine(ex, ConsoleColor.Red, Verbosity.verbose);
+							executor.Execute(sourcePath, destinationPath);
+							Log.WriteLine($"Installed '{include.path}' to '{destinationRootPath}'", ConsoleColor.Green, Verbosity.normal);
+						}
+					}
+					catch (Exception ex)
+					{
+						Log.Error.WriteLine($"Failed to install '{include.path}'", ConsoleColor.Red, Verbosity.normal);
+						Log.Error.WriteLine(ex, ConsoleColor.Red, Verbosity.verbose);
+					}
 				}
 			}
 		}

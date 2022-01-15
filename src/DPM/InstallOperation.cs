@@ -45,35 +45,33 @@ namespace Andtech.DPM
 				Console.ResetColor();
 				Environment.Exit(-1);
 			}
-			var destinationRootPath = shell.ExpandEnvironmentVariables(installLocation.Destination);
+			var destinationRootsGlob = shell.ExpandEnvironmentVariables(installLocation.Destination);
 
 			// Logging
 			Log.WriteLine($"Installing dotfiles as '{destinationPlatform}'...", Verbosity.normal);
 			Log.WriteLine($"Source root path: '{sourceRootPath}'", Verbosity.verbose);
-			Log.WriteLine($"Destination root path: '{destinationRootPath}'", Verbosity.verbose);
+			Log.WriteLine($"Destination root path: '{destinationRootsGlob}'", Verbosity.verbose);
 
 			var executor = new Executor(options, shell);
 
-			var destinationRoots = Glob.ExpandNames(destinationRootPath);
+			var sourcePaths = package.GetIncludedFiles();
+			var destinationRoots = Glob.ExpandNames(destinationRootsGlob);
+
 			foreach (var destinationRoot in destinationRoots)
 			{
-				foreach (var include in package.include)
+				foreach (var sourcePath in sourcePaths)
 				{
-					var sourceRoot = Path.Combine(sourceRootPath, include.path);
-					var sourcePaths = Glob.ExpandNames(sourceRoot);
+					var relativeSourcePath = Path.GetRelativePath(sourceRootPath, sourcePath);
 					try
 					{
-						foreach (var sourcePath in sourcePaths)
-						{
-							var destinationPath = Path.Combine(destinationRoot, include.GetDestinationPath());
+						var destinationPath = Path.Combine(destinationRoot, relativeSourcePath);
 
-							executor.Execute(sourcePath, destinationPath);
-							Log.WriteLine($"Installed '{include.path}' to '{destinationRootPath}'", ConsoleColor.Green, Verbosity.normal);
-						}
+						executor.Execute(sourcePath, destinationPath);
+						Log.WriteLine($"Installed '{relativeSourcePath}' to '{destinationPath}'", ConsoleColor.Green, Verbosity.normal);
 					}
 					catch (Exception ex)
 					{
-						Log.Error.WriteLine($"Failed to install '{include.path}'", ConsoleColor.Red, Verbosity.normal);
+						Log.Error.WriteLine($"Failed to install '{relativeSourcePath}'", ConsoleColor.Red, Verbosity.normal);
 						Log.Error.WriteLine(ex, ConsoleColor.Red, Verbosity.verbose);
 					}
 				}

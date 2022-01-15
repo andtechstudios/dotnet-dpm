@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Ganss.IO;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using YamlDotNet.Serialization;
 
 namespace Andtech.DPM
@@ -58,6 +60,17 @@ namespace Andtech.DPM
 		public string Path { get; set; }
 
 		string IInstallLocation.Destination => destination;
+
+		public IEnumerable<string> GetIncludedFiles()
+		{
+			return include.SelectMany(ExpandIncludeGlob);
+
+			IEnumerable<string> ExpandIncludeGlob(Include include)
+			{
+				var sourcePathsGlob = System.IO.Path.Combine(Root, include.GetDestinationPath());
+				return Glob.ExpandNames(sourcePathsGlob);
+			}
+		}
 
 		public IInstallLocation GetInstallLocation(Platform platform)
 		{

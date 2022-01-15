@@ -2,4 +2,4 @@ include:
   - path: settings.json
   - path: syntax/*
 
-destination: "alpha/**/charlie"
+destination: "alpha/*/charlie"

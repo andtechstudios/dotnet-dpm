@@ -1,9 +1,6 @@
 ﻿using Andtech.Common;
 using CommandLine;
-using Ganss.IO;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,167 +9,35 @@ namespace Andtech.DPM
 
 	internal class InstallOperation
 	{
-		private readonly Session session;
+		[Verb("install", isDefault: true, HelpText = "Install dotfile package.")]
+		public class Options : BaseOptions { }
 
-		public InstallOperation()
-		{
-			session = new Session();
-		}
+		private Session session;
 
 		public async Task OnParse(Options options)
 		{
-			Log.Verbosity = options.Verbose ? Verbosity.verbose : options.Verbosity;
+			session = new Session(options);
+			var gatherer = new PathGatherer(session, options.Name);
+			var executor = new Executor(options, session.ClientShell);
 
 			// Logging
-			Log.WriteLine($"Dotfiles root is: '{session.DotfilesRoot}'", Verbosity.diagnostic);
-			Log.WriteLine($"Platform is: '{session.Platform}'", Verbosity.diagnostic);
+			Log.WriteLine($"Installing dotfiles as '{session.ClientPlatform}'...", Verbosity.normal);
+			Log.WriteLine($"Packaged content is:", Verbosity.diagnostic);
+			Log.WriteLine(string.Join(Environment.NewLine, gatherer.Results.Select(x => x.SourcePath)), Verbosity.diagnostic);
+			Log.WriteLine($"Destination paths are:", Verbosity.diagnostic);
+			Log.WriteLine(string.Join(Environment.NewLine, gatherer.Results.Select(x => x.DestinationPath)), Verbosity.diagnostic);
 
-			// Read dotfile package
-			var package = LoadPackage(options.Name);
-			var sourceRootPath = Path.GetDirectoryName(package.Path);
-
-			var preferredDestinationPlatform = options.Platform;
-			var destinationPlatform = CoalescePlatform(preferredDestinationPlatform);
-			var shell = Shell.GetCurrentShell(destinationPlatform);
-			Log.WriteLine($"Preferred destination platform: '{preferredDestinationPlatform}'", Verbosity.diagnostic);
-
-			// Prepare install location
-			var installLocation = package.GetInstallLocation(destinationPlatform);
-			if (string.IsNullOrEmpty(installLocation.Destination))
+			foreach (var result in gatherer.Results)
 			{
-				Console.ForegroundColor = ConsoleColor.Red;
-				Console.Error.WriteLine($"Platform '{destinationPlatform}' is unsupported.");
-				Console.ResetColor();
-				Environment.Exit(-1);
-			}
-			var destinationRootsGlob = shell.ExpandEnvironmentVariables(installLocation.Destination);
-
-			// Logging
-			Log.WriteLine($"Installing dotfiles as '{destinationPlatform}'...", Verbosity.normal);
-			Log.WriteLine($"Source root path: '{sourceRootPath}'", Verbosity.silly);
-			Log.WriteLine($"Destination root glob: '{destinationRootsGlob}'", Verbosity.silly);
-
-			var destinationRoots = Glob.ExpandNames(destinationRootsGlob);
-			Log.WriteLine($"Source paths are:", Verbosity.diagnostic);
-			Log.WriteLine(string.Join(Environment.NewLine, package.GetIncludedFiles()), Verbosity.diagnostic);
-			Log.WriteLine($"Destination roots are:", Verbosity.diagnostic);
-			Log.WriteLine(string.Join(Environment.NewLine, destinationRoots), Verbosity.diagnostic);
-
-			var executor = new Executor(options, shell);
-			foreach (var destinationRoot in destinationRoots)
-			{
-				foreach (var include in package.include)
+				try
 				{
-					var sourcePaths = include.ExpandGlob(package.Root);
-					foreach (var relativeSourcePath in sourcePaths)
-					{
-						var sourcePath = Path.Combine(package.Root, relativeSourcePath);
-						try
-						{
-							var destinationPath = Path.Combine(destinationRoot, include.GetDestinationPath(relativeSourcePath));
-
-							executor.Execute(sourcePath, destinationPath);
-							Log.WriteLine($"Installed '{relativeSourcePath}' to '{destinationPath}'", ConsoleColor.Green, Verbosity.normal);
-						}
-						catch (Exception ex)
-						{
-							Log.Error.WriteLine($"Failed to install '{relativeSourcePath}'", ConsoleColor.Red, Verbosity.normal);
-							Log.Error.WriteLine(ex, ConsoleColor.Red, Verbosity.verbose);
-						}
-					}
+					executor.Copy(result.SourcePathFull, result.DestinationPath, options.CreateSymbolicLink);
+					Log.WriteLine($"Installed '{result.SourcePath}' to '{result.DestinationPath}'", ConsoleColor.Green, Verbosity.normal);
 				}
-			}
-		}
-
-		Package LoadPackage(string name)
-		{
-			try
-			{
-				var packagePath = Path.Combine(session.DotfilesRoot, name);
-				return Package.Read(packagePath);
-			}
-			catch (IOException)
-			{
-				throw new IOException($"Unable to load package '{name}'");
-			}
-		}
-
-		Platform CoalescePlatform(Platform preferredDestinationPlatform)
-		{
-			if (preferredDestinationPlatform == Platform.auto)
-			{
-				if (session.Platform == Platform.wsl)
+				catch (Exception ex)
 				{
-					return Platform.linux;
-				}
-				else
-				{
-					return session.Platform;
-				}
-			}
-			else
-			{
-				return preferredDestinationPlatform;
-			}
-		}
-
-		[Verb("install", isDefault: true, HelpText = "Install dotfile package.")]
-		public class Options
-		{
-			[Value(0, HelpText = "Name of the package.", Required = true)]
-			public string Name { get; set; }
-			[Option('s', "symbolic")]
-			public bool CreateSymbolicLink { get; set; }
-			[Option('n', "dry-run")]
-			public bool DryRun { get; set; }
-			[Option("verbosity", HelpText = "Verbosity of logging")]
-			public Verbosity Verbosity { get; set; }
-			[Option('v', "verbose")]
-			public bool Verbose { get; set; }
-
-			[Option("auto")]
-			public bool IsAuto { get; set; }
-			[Option("windows")]
-			public bool IsWindows { get; set; }
-			[Option("wsl")]
-			public bool IsWSL { get; set; }
-			[Option("macos")]
-			public bool IsMacOS { get; set; }
-			[Option("linux")]
-			public bool IsLinux { get; set; }
-
-			public Platform Platform
-			{
-				get
-				{
-					{
-						if (IsAuto)
-						{
-							return Platform.auto;
-						}
-
-						if (IsWindows)
-						{
-							return Platform.windows;
-						}
-
-						if (IsWSL)
-						{
-							return Platform.wsl;
-						}
-
-						if (IsMacOS)
-						{
-							return Platform.macos;
-						}
-
-						if (IsLinux)
-						{
-							return Platform.linux;
-						}
-
-						return Platform.auto;
-					}
+					Log.Error.WriteLine($"Failed to install '{result.SourcePath}'", ConsoleColor.Red, Verbosity.normal);
+					Log.Error.WriteLine(ex, ConsoleColor.Red, Verbosity.verbose);
 				}
 			}
 		}

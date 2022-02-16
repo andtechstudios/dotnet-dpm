@@ -20,7 +20,7 @@ namespace Andtech.DPM
 
 		protected abstract VariableExpander CreateVariableExpander();
 
-		public static Shell GetCurrentShell(Platform platform)
+		public static Shell GetShell(Platform platform)
 		{
 			switch (platform)
 			{

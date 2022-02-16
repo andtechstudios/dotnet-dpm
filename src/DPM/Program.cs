@@ -9,8 +9,9 @@ namespace Andtech.DPM
 
 		static async Task Main(string[] args)
 		{
-			var result = Parser.Default.ParseArguments<InstallOperation.Options, object>(args);
+			var result = Parser.Default.ParseArguments<InstallOperation.Options, PackOperation.Options>(args);
 			await result.WithParsedAsync<InstallOperation.Options>(new InstallOperation().OnParse);
+			await result.WithParsedAsync<PackOperation.Options>(new PackOperation().OnParse);
 		}
 	}
 }

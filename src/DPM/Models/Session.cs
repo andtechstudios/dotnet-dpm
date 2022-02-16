@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Andtech.Common;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -7,7 +8,11 @@ namespace Andtech.DPM
 
 	internal class Session
 	{
-		public Platform Platform { get; private set; }
+		public Platform HostPlatform { get; private set; }
+		public Platform PreferredPlatform { get; private set; }
+		public Platform ClientPlatform { get; private set; }
+		public Shell HostShell { get; private set; }
+		public Shell ClientShell { get; private set; }
 		public readonly string HomeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 		public string DotfilesRoot
 		{
@@ -35,9 +40,20 @@ namespace Andtech.DPM
 			}
 		}
 
-		public Session()
+		public Session(BaseOptions options)
 		{
-			Platform = GetCurrentPlatform();
+			Log.Verbosity = options.Verbose ? Verbosity.verbose : options.Verbosity;
+			PreferredPlatform = options.Platform;
+			HostPlatform = GetCurrentPlatform();
+			ClientPlatform = CoalescePlatform(options.Platform);
+
+			ClientShell = Shell.GetShell(ClientPlatform);
+			HostShell = Shell.GetShell(HostPlatform);
+
+			// Logging
+			Log.WriteLine($"Dotfiles root is: '{DotfilesRoot}'", Verbosity.diagnostic);
+			Log.WriteLine($"Host platform is: '{HostPlatform}'", Verbosity.diagnostic);
+			Log.WriteLine($"Preferred client platform: '{PreferredPlatform}'", Verbosity.diagnostic);
 		}
 
 		public static Platform GetCurrentPlatform()
@@ -63,6 +79,25 @@ namespace Andtech.DPM
 			}
 
 			return Platform.unknown;
+		}
+
+		Platform CoalescePlatform(Platform preferredDestinationPlatform)
+		{
+			if (preferredDestinationPlatform == Platform.auto)
+			{
+				if (HostPlatform == Platform.wsl)
+				{
+					return Platform.linux;
+				}
+				else
+				{
+					return HostPlatform;
+				}
+			}
+			else
+			{
+				return preferredDestinationPlatform;
+			}
 		}
 	}
 }

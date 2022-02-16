@@ -7,18 +7,18 @@ namespace Andtech.DPM
 
 	internal class Executor
 	{
-		private InstallOperation.Options options;
+		private BaseOptions options;
 		private Shell shell;
 
-		public Executor(InstallOperation.Options options, Shell shell)
+		public Executor(BaseOptions options, Shell shell)
 		{
 			this.options = options;
 			this.shell = shell;
 		}
 
-		public void Execute(string sourceFilePath, string destinationFilePath)
+		public void Copy(string sourceFilePath, string destinationFilePath, bool symbolicLink = false)
 		{
-			if (options.CreateSymbolicLink)
+			if (symbolicLink)
 			{
 				DeletePathIfExists(destinationFilePath);
 				CreateDirectoryIfNoExists(destinationFilePath);

@@ -49,6 +49,11 @@ namespace Andtech.DPM
 
 		public override string ExpandEnvironmentVariables(string expression)
 		{
+			if (string.IsNullOrEmpty(expression))
+			{
+				return expression;
+			}
+
 			expression = ReplacePattern(expression, HomeRegex, x => "$HOME");
 			expression = BashRegex.Replace(expression, ExpandVariable);
 
@@ -61,6 +66,11 @@ namespace Andtech.DPM
 
 		public override string ExpandEnvironmentVariables(string expression)
 		{
+			if (string.IsNullOrEmpty(expression))
+			{
+				return expression;
+			}
+
 			expression = ReplacePattern(expression, HomeRegex, x => "%userprofile%");
 			expression = Environment.ExpandEnvironmentVariables(expression);
 
@@ -72,6 +82,11 @@ namespace Andtech.DPM
 	{
 		public override string ExpandEnvironmentVariables(string expression)
 		{
+			if (string.IsNullOrEmpty(expression))
+			{
+				return expression;
+			}
+
 			expression = ReplacePattern(expression, HomeRegex, x => "%userprofile%");
 			expression = ReplacePattern(expression, @"\%[\w]+\%", ExpandWSLVariable);
 			expression = Environment.ExpandEnvironmentVariables(expression);

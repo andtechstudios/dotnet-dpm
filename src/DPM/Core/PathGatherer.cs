@@ -46,19 +46,33 @@ namespace Andtech.DPM
 				foreach (var include in package.include)
 				{
 					var sourcePaths = include.ExpandGlob(package.Root);
-					foreach (var relativeSourcePath in sourcePaths)
+					foreach (var sourcePath in sourcePaths)
 					{
-						var sourcePath = Path.Combine(package.Root, relativeSourcePath);
-						var destinationPath = Path.Combine(destinationRoot, include.GetDestinationPath(relativeSourcePath));
+						// Evaluate destinations
+						var destinationPathGlob = session.ClientShell.ExpandEnvironmentVariables(include.destination);
+						var destinationPaths = Glob.ExpandNames(GetRootedPath(destinationPathGlob));
 
-						var result = new Result()
+						foreach (var destinationPath in destinationPaths)
 						{
-							SourcePathFull = sourcePath,
-							SourcePath = relativeSourcePath,
-							DestinationPath = destinationPath,
-						};
+							var result = new Result()
+							{
+								SourcePathFull = Path.Combine(package.Root, sourcePath),
+								SourcePath = sourcePath,
+								DestinationPath = destinationPath,
+							};
 
-						results.Add(result);
+							results.Add(result);
+						}
+
+						string GetRootedPath(string path)
+						{
+							if (!Path.IsPathRooted(path))
+							{
+								path = Path.Combine(destinationRoot, include.GetDestinationPath(sourcePath));
+							}
+
+							return path;
+						}
 					}
 				}
 			}

@@ -63,7 +63,13 @@ namespace Andtech.DPM
 		public InstallLocation macos;
 		public InstallLocation linux;
 		public InstallLocation wsl;
+		/// <summary>
+		/// The root directory of the package.
+		/// </summary>
 		public string Root => System.IO.Path.GetDirectoryName(Path);
+		/// <summary>
+		/// The path to the package manifest.
+		/// </summary>
 		public string Path { get; set; }
 
 		string IInstallLocation.Destination => destination;

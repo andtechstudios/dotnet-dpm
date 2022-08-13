@@ -43,6 +43,8 @@ namespace Andtech.DPM
 		public Session(BaseOptions options)
 		{
 			Log.Verbosity = options.Verbose ? Verbosity.verbose : options.Verbosity;
+			DryRun.IsDryRun |= options.DryRun;
+
 			PreferredPlatform = options.Platform;
 			HostPlatform = GetCurrentPlatform();
 			ClientPlatform = CoalescePlatform(options.Platform);

@@ -38,11 +38,10 @@ namespace Andtech.DPM
 
 			if (!Directory.Exists(parent))
 			{
-				Log.WriteLine($"Creating directory '{parent}'...", ConsoleColor.Yellow, Verbosity.silly);
-				if (!options.DryRun)
-				{
-					Directory.CreateDirectory(parent);
-				}
+				DryRun.TryExecute(() => Directory.CreateDirectory(parent),
+					$"Creating directory '{parent}'...",
+					ConsoleColor.Yellow,
+					Verbosity.silly);
 			}
 		}
 
@@ -50,19 +49,17 @@ namespace Andtech.DPM
 		{
 			if (File.Exists(destination))
 			{
-				Log.WriteLine($"Deleting file '{destination}'...", ConsoleColor.Yellow, Verbosity.silly);
-				if (!options.DryRun)
-				{
-					File.Delete(destination);
-				}
+				DryRun.TryExecute(() => File.Delete(destination),
+					$"Deleting file '{destination}'...",
+					ConsoleColor.Yellow,
+					Verbosity.silly);
 			}
 			else if (Directory.Exists(destination))
 			{
-				Log.WriteLine($"Deleting directory '{destination}'...", ConsoleColor.Yellow, Verbosity.silly);
-				if (!options.DryRun)
-				{
-					Directory.Delete(destination, true);
-				}
+				DryRun.TryExecute(() => Directory.Delete(destination, true),
+					$"Deleting directory '{destination}'...",
+					ConsoleColor.Yellow,
+					Verbosity.silly);
 			}
 		}
 
@@ -70,20 +67,19 @@ namespace Andtech.DPM
 		{
 			source = Path.GetFullPath(source);
 			destination = Path.GetFullPath(destination);
-			Log.WriteLine($"Creating symlink for '{source}' at '{destination}'...", ConsoleColor.Yellow, Verbosity.silly);
-			if (!options.DryRun)
-			{
-				shell.CreateSymbolicLink(source, destination);
-			}
+
+			DryRun.TryExecute(() => shell.CreateSymbolicLink(source, destination),
+				$"Creating symlink for '{source}' at '{destination}'...",
+				ConsoleColor.Yellow,
+				Verbosity.silly);
 		}
 
 		void Copy(string source, string destination)
 		{
-			Log.WriteLine($"Copying '{source}' to '{destination}'...", ConsoleColor.Yellow, Verbosity.silly);
-			if (!options.DryRun)
-			{
-				shell.Copy(source, destination);
-			}
+			DryRun.TryExecute(() => shell.Copy(source, destination),
+				$"Copying '{source}' to '{destination}'...",
+				ConsoleColor.Yellow,
+				Verbosity.silly);
 		}
 	}
 }

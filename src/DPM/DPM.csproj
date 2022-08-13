@@ -51,7 +51,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 	<ItemGroup>
-	  <PackageReference Include="Andtech.Common" Version="0.18.0" />
+	  <PackageReference Include="Andtech.Common" Version="0.18.1" />
 	  <PackageReference Include="CliWrap" Version="3.3.3" />
 	  <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
 	  <PackageReference Include="Glob.cs" Version="5.1.766" />

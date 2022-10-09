@@ -1,4 +1,5 @@
-> :warning: This project is no longer maintained. A python reimplementation is being developed [here](https://github.com/zensharp/dpm).
+| :warning: This project is no longer maintained. A python reimplementation is being developed [here](https://github.com/zensharp/dpm). |
+| --- |
 
 # DPM
 *Dotfile package manager*
